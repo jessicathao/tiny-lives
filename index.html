@@ -83,6 +83,7 @@
   .ctl.like[aria-pressed="true"] { background:rgba(232,111,142,.18); border-color:rgba(232,111,142,.5); color:#ffd1dc; }
   .ctl.like.pop { animation:likepop .5s ease; }
   @keyframes likepop { 40% { transform:scale(1.18); } }
+  body.pseudo-fs { overflow-x:hidden; overscroll-behavior:none; }
   body.pseudo-fs .app { min-height:calc(100vh + 160px); }        /* room to swipe: Safari then hides its bars */
   body.pseudo-fs header, body.pseudo-fs .controls, body.pseudo-fs aside { visibility:hidden; }
   body.pseudo-fs .stage { position:fixed; inset:0; z-index:50; border-radius:0; aspect-ratio:auto; display:flex; align-items:center; justify-content:center; background:#1c1916; }
@@ -269,9 +270,13 @@ const clockText = (hh, mm) => LANG === 'vi' ? `${hh}:${String(mm).padStart(2, '0
 const W = 1280, H = 720, TAU = Math.PI * 2;
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 let k = 1;
+var canRedraw = false;                                          // set once the game is running (var: resize runs before everything is defined)
 function resize() {
   const r = cv.getBoundingClientRect(), dpr = Math.min(2, devicePixelRatio || 1);
-  cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.width * 9 / 16 * dpr); k = cv.width / W;
+  const w = Math.round(r.width * dpr), h = Math.round(r.width * 9 / 16 * dpr);
+  if (w === cv.width && h === cv.height) return;                 // nothing changed: keep the picture
+  cv.width = w; cv.height = h; k = cv.width / W;                 // (this wipes the canvas…)
+  if (canRedraw) try { draw(hour()); } catch (e) {}              // …so repaint at once: no black flashes while phone bars slide in and out
 }
 new ResizeObserver(resize).observe(cv); resize();
 
@@ -4430,6 +4435,7 @@ onNewDay();
 snapAll();
 let last = performance.now();
 function loop(now) {
+  canRedraw = true;
   const dt = Math.min(.05, (now - last) / 1000); last = now;
   rt += dt;
   let dm = 0;
