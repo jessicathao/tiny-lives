@@ -74,6 +74,8 @@
   aside li b small { font-weight:400; color:var(--muted); margin-left:6px; }
   aside li em { font-style:normal; color:var(--muted); font-size:13px; grid-column:2; }
 </style>
+<!-- Anonymous visit counter (no cookies): https://tinylives.goatcounter.com -->
+<script data-goatcounter="https://tinylives.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <div class="app">
@@ -3391,7 +3393,13 @@ function initAudio() {
   seaGain = gainNode(0); loop(biquad('lowpass', 520), seaGain);
   nextBeat = AC.currentTime + .2;
 }
-function unlockAudio() { initAudio(); if (AC.state !== 'running') AC.resume(); }
+// Count one "play" per visit in GoatCounter (anonymous, no cookies).
+let playCounted = false;
+function countPlay(name) {
+  if (playCounted) return; playCounted = true;
+  try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'play-' + name, title: 'Pressed play', event: true }); } catch (e) {}
+}
+function unlockAudio() { initAudio(); if (AC.state !== 'running') AC.resume(); countPlay('tiny-lives'); }
 function applyVolume() { if (AC) master.gain.setTargetAtTime(soundOn ? vol * 1.1 : 0, AC.currentTime, .08); }
 function piano(midi, when, vel, hold, pan = 0) {
   const f = 440 * Math.pow(2, (midi - 69) / 12);

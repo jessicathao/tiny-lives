@@ -47,6 +47,8 @@
   @keyframes blink { 50% { opacity:.2; } }
   .status { margin-left:auto; color:var(--muted); font-size:13px; }
 </style>
+<!-- Anonymous visit counter (no cookies): https://tinylives.goatcounter.com -->
+<script data-goatcounter="https://tinylives.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
   <header>
@@ -477,7 +479,14 @@ function updateUI() {
   ui.rec.classList.toggle('recording', !!recording);
   ui.rec.lastChild.textContent = recording ? ' Recording…' : ' Record video';
 }
+// Count one "play" per visit in GoatCounter (anonymous, no cookies).
+let playCounted = false;
+function countPlay(name) {
+  if (playCounted) return; playCounted = true;
+  try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'play-' + name, title: 'Pressed play', event: true }); } catch (e) {}
+}
 function begin(record) {
+  countPlay('pencil-sonata');
   if (recorder && recorder.state === 'recording') { recorder.onstop = null; recorder.stop(); }
   ui.overlay.classList.add('hidden');
   startRun();

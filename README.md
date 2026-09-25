@@ -66,6 +66,6 @@ GitHub Pages refreshes the site about a minute later.
 - Each game is a single HTML file with plain JavaScript and no libraries.
 - All graphics are drawn on an HTML `<canvas>`, with no image files.
 - All sound (piano, rain, thunder, fireworks, crickets, bus horn) is generated live with the Web Audio API, with no audio files.
-- The only outside resource is the [Caveat](https://fonts.google.com/specimen/Caveat) font from Google Fonts.
+- The only outside resources are the [Caveat](https://fonts.google.com/specimen/Caveat) font from Google Fonts and a [GoatCounter](https://www.goatcounter.com) script that counts visits and plays anonymously (no cookies, no personal data).
 
 The melodies used ("Happy Birthday", "Auld Lang Syne", Wagner's "Bridal Chorus", "Twinkle Twinkle Little Star" and "Row, Row, Row Your Boat") are traditional or public-domain tunes.
