@@ -1364,7 +1364,7 @@ R.leo.hol.unshift(
 const lilyHere = () => {
   const h = hour(), ho = holId();
   if (day === WED_DAY) return h >= 12.5;
-  if (dating() && nyT() >= 19 && nyT() < 24.8) return true;     // she stays up for the New Year countdown
+  if (!married() && holId() === 'newyear') return h >= 11 && h < 19.5;   // while dating, she celebrates midnight with her own family
   if (married()) return true;
   if (!dating() || tripOn()) return false;
   if (day === MEET_DAY) return h >= 17.2 && h < 21.3;
@@ -1674,6 +1674,25 @@ DAISY.slook = { winter: { sweater: '#f4a6c6' } };
 R.maya.slook = { summer: { shirt: '#f7c6d9' }, autumn: { shirt: '#c8702a' }, winter: { shirt: '#2e7d4f', scarf: '#f2c230' } };
 R.otto.slook = { summer: { shirt: '#f4efe6' }, winter: { shirt: '#8b3a3a', scarf: '#2d3a4a' } };
 
+LILY.bye = () => married() ? null : holId() === 'newyear' ? 'Happy New Year, everyone! I am off to celebrate with my family!' : 'Good night, Leo! See you soon!';
+
+// ----- Leo's birthday: Lily, Poppy and Daisy join the party in the den -----
+partyActs('lily', {
+  games: { label: 'dancing with Leo at his party', wander: [640, 790], action: 'dance', say: 'Happy birthday, Leo!' },
+  sing:  { label: 'singing Happy Birthday', spot: 792, face: 1, action: 'carol', say: '♪ Happy birthday, dear Leo… ♪' },
+  cake:  { label: 'eating birthday cake', spot: 792, face: 1, action: 'eat', say: 'Nora, this cake is perfect!' },
+  gifts: { label: 'giving Leo his present', spot: 792, face: 1, action: 'gift', fx: 'hearts', say: 'Open mine! Open mine!' } }, { party: '#f4a6c6' });
+partyActs('daisy', {
+  games: { label: 'bouncing around the party with Biscuit', wander: [650, 950], fast: true, action: 'play', say: 'Party! Party!' },
+  sing:  { label: 'howling along with Biscuit', spot: 962, face: -1, pose: 'sit', action: 'bark', say: 'Arooo!' },
+  cake:  { label: 'catching cake crumbs', spot: 962, face: -1, action: 'eat', say: 'Crumbs for me?' },
+  gifts: { label: 'playing with the wrapping paper', wander: [880, 1000], fast: true, action: 'play', say: 'Crinkly!' } }, { party: '#f4a6c6' });
+BABY.acts.p_couch = { label: 'at the birthday party in a tiny party hat', zone: 'biscuit', spot: 772, dy: -22, face: 1, pose: 'sit', action: 'dance', look: { party: '#f2c230' }, say: 'Ga ga! Cake!' };
+BABY.acts.p_toddle = { label: 'dancing at the birthday party', zone: 'biscuit', wander: [640, 790], action: 'dance', look: { party: '#f2c230' }, say: 'Happy birfday, Dada!' };
+BABY.hol = [[HOL(BDAY, 14, 17), () => yearOf(day) >= 8 ? 'p_toddle' : 'p_couch'], ...(BABY.hol || [])];
+for (const id of ['pepper', 'button', 'waffles']) { R[id].acts.p_party = followAct('daisy', { label: 'tumbling around the party after Mama Daisy', look: { party: '#e86f8e' }, say: 'Yip! Party!' });
+  R[id].hol = [[HOL(BDAY, 14, 17), 'p_party']]; }
+
 // ----- New Year's Eve with Lily, Poppy and Daisy -----
 LILY.acts.nyparty = { label: "sipping cider at the New Year's Eve party", zone: 'biscuit', spot: 846, dy: -6, face: -1, pose: 'sit', action: 'drink', look: { party: '#f4a6c6' }, say: 'Our first New Year together!' };
 LILY.acts.nywatch = { zone: 'garden', spot: 1076, face: -1, look: { ...COZY, hat: '#f4efe6', scarf: '#f4a6c6' },
@@ -1684,7 +1703,7 @@ LILY.hol.unshift([NY(20, 23.5), 'nyparty'], [NY(23.5, 24.7), 'nywatch']);
 BABY.acts.nytoddle = { zone: 'garden', spot: 1060, face: 1, look: { hat: '#f4a6c6', scarf: '#f2c230' }, get action() { return nyT() >= 24 ? 'stretch' : 'wave'; },
   label: () => nyT() >= 24 ? (yearOf(day) === 8 ? 'seeing fireworks for the very first time!' : 'cheering at the New Year fireworks') : 'staying up late for the countdown', say: () => nyT() >= 24 ? 'Ooooh! Pretty!' : 'Boom boom?' };
 BABY.acts.nypram = { label: () => nyT() >= 24 ? 'watching the fireworks from the pram' : 'bundled up in the pram for the countdown', zone: 'pram', spot: 0, say: 'Ga!' };
-BABY.hol = [[NY(23.4, 24.7), () => yearOf(day) >= 8 ? 'nytoddle' : 'nypram']];
+BABY.hol = [[NY(23.4, 24.7), () => yearOf(day) >= 8 ? 'nytoddle' : 'nypram'], ...(BABY.hol || [])];
 DAISY.acts.nyhide = { label: 'hiding from the fireworks with Biscuit', zone: 'biscuit', spot: 1004, dy: -6, pose: 'sleep', shiver: true, say: 'Too loud! Too loud!' };
 DAISY.hol.unshift([NY(23.5, 24.7), 'nyhide']);
 R.leo.whatNow = () => hasBaby() ? 'dad · astronomer' : married() ? 'newlywed · astronomer' : day >= WORK_START ? 'junior astronomer' : leoAdult() ? 'graduate' : 'kid';
@@ -1802,7 +1821,7 @@ function updateResidents(dt, dm) {
     if (r.guest) {
       const want = r.comes(h, ho, se);
       if (want && !r.here) { r.here = true; r.departing = false; r.fresh = true; r.fade = 0; r.actId = null; ding(); }
-      else if (!want && r.here) r.departing = true;
+      else if (!want && r.here) { if (!r.departing && r.bye) { const b = r.bye(); if (b) { r.bubble = b; r.bubbleUntil = rt + 3.5; } } r.departing = true; }
       if (!r.here) continue;
     }
     const id = actFor(r, h);
