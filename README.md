@@ -33,6 +33,9 @@ A cutaway house with an attic, bedrooms, a kitchen, a den, a basement and garden
 
 ## How to play
 
+**On a phone:** tap Share → **Add to Home Screen**. Tiny Lives then opens like an app, full screen, with no browser bars.
+
+
 | Control | What it does |
 | --- | --- |
 | Click a room | Zoom in (click again or press **Esc** to zoom out) |
@@ -44,7 +47,7 @@ A cutaway house with an attic, bedrooms, a kitchen, a den, a basement and garden
 | **School day ▸ / Rainy day ▸ / Snowy day ▸** | Jump straight to those days |
 | **Life story ▸** | Jump to the next chapter of Leo's life |
 | **Space** | Pause and resume |
-| **⛶ Full screen** or **F** | Make the game fill the whole screen (Esc to leave) |
+| **⛶ Full screen** or **F** | Make the game fill the whole screen (Esc to leave). On phones it fills the browser window; turn the phone sideways for the biggest picture |
 | **♡ Like** | Like the game (one like per browser, with a public count) |
 | **EN / VI** | Switch between English and Vietnamese (Tiếng Việt) |
 
