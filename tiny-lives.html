@@ -64,6 +64,20 @@
   aside li.family b small { color:#f4a6c6; }
   .tripbtn { position:absolute; left:12px; bottom:12px; background:rgba(28,25,22,.8); backdrop-filter:blur(6px); }
   .tripbtn[hidden] { display:none; }
+  .guide { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:16px; background:rgba(12,10,8,.72); backdrop-filter:blur(4px); }
+  .guide[hidden] { display:none; }
+  .guide-card { width:min(580px, 100%); max-height:calc(100vh - 32px); overflow:auto; background:var(--panel); border:1px solid var(--line);
+    border-radius:14px; padding:22px 24px; box-shadow:0 30px 80px rgba(0,0,0,.5); }
+  .guide-card h2 { font-family:Caveat,cursive; font-size:40px; line-height:1; margin:0 0 6px; }
+  .guide-card .lead { color:var(--muted); margin:0; }
+  .guide-card h3 { font-size:12.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; margin:18px 0 8px; }
+  .guide-card ol { margin:0; padding-left:20px; display:grid; gap:7px; }
+  .guide-card li b { color:var(--ink); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chips span { font-size:12.5px; padding:4px 10px; border-radius:999px; background:rgba(243,234,216,.07); border:1px solid var(--line); }
+  .guide-tips { color:var(--muted); font-size:13px; margin:16px 0 0; }
+  .guide-actions { display:flex; justify-content:flex-end; margin-top:18px; }
+  button.ctl.primary { background:var(--accent); color:#1c1916; border-color:transparent; font-weight:600; }
   aside { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; align-self:start; }
   aside h2 { margin:0 0 4px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
   aside ul { list-style:none; margin:0; padding:0; }
@@ -94,6 +108,7 @@
       <button class="enter" id="enter"><span><i><svg width="26" height="26" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z" fill="#1c1916"/></svg></i>step inside · sound on</span></button>
     </div>
     <div class="controls">
+      <button class="ctl" id="helpBtn">? How to play</button>
       <button class="ctl" id="pause">❚❚ Pause</button>
       <div class="group" id="speed">
         <button class="ctl" data-s="1" aria-pressed="true">1×</button>
@@ -140,6 +155,31 @@
     <h2>Right now</h2>
     <ul id="list"></ul>
   </aside>
+</div>
+
+<div class="guide" id="guide" hidden role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+  <div class="guide-card">
+    <h2 id="guideTitle">Welcome to Tiny Lives</h2>
+    <p class="lead">A little house where a family (and lots of animals) live their days, the seasons and a whole life story.
+      There are no scores and no way to lose: watch, click around and discover things.</p>
+    <h3>How to play</h3>
+    <ol>
+      <li><b>Click a room</b> to peek inside. Click again, or press <b>Esc</b>, to see the whole house.</li>
+      <li><b>Click anyone</b> to say hi. They'll tell you what they're up to and play their own little tune.</li>
+      <li><b>Time passes by itself.</b> A day lasts about 4 minutes. Use <b>4×</b> or <b>12×</b> to speed up, or <b>Space</b> to pause.</li>
+      <li><b>Jump around</b> with the buttons under the picture: a time of day, a season, <b>Next holiday ▸</b>, <b>Rainy day ▸</b>, <b>Snowy day ▸</b> or <b>Life story ▸</b>.</li>
+      <li><b>Pick the weather</b> (sun, rain, storm, snow) or leave it on Auto.</li>
+      <li>The <b>Right now</b> list shows what everyone is doing. Click a name to find them.</li>
+    </ol>
+    <h3>Things to discover</h3>
+    <div class="chips">
+      <span>Egg hunt (click the eggs!)</span><span>Leo's birthday party</span><span>School days &amp; the school bus</span><span>Beach &amp; camping trip</span>
+      <span>Summer fireworks</span><span>Pet adoption day</span><span>Pumpkin Night</span><span>Winter festival</span><span>New Year countdown</span>
+      <span>Rainy-day board games</span><span>Building a snowman</span><span>Leo grows up, falls in love and starts a family</span>
+    </div>
+    <p class="guide-tips">Turn your sound on for the piano music. Everything is drawn and played live in your browser.</p>
+    <div class="guide-actions"><button class="ctl primary" id="guideStart">Start playing ▸</button></div>
+  </div>
 </div>
 
 <script>
@@ -3579,6 +3619,16 @@ function updateUI() {
     r.li.querySelector('em').textContent = labelOf(r); if (r.whatNow) r.li.querySelector('small').textContent = r.whatNow(); r.li.classList.toggle('on', !!focus && focus.id === r.zone); }
 }
 $('enter').onclick = () => { $('enter').classList.add('hidden'); unlockAudio(); chime([67, 71, 74, 79]); };
+// ----- the "How to play" guide: shown on a first visit, and from the ? button -----
+function openGuide() {
+  $('guideStart').textContent = $('enter').classList.contains('hidden') ? 'Back to the game ▸' : 'Start playing ▸';
+  $('guide').hidden = false; $('guideStart').focus({ preventScroll: true }); document.querySelector('.guide-card').scrollTop = 0;
+}
+function closeGuide() { $('guide').hidden = true; try { localStorage.setItem('tinylives-guide-seen', '1'); } catch (e) {} }
+$('helpBtn').onclick = openGuide;
+$('guideStart').onclick = () => { closeGuide(); if (!$('enter').classList.contains('hidden')) $('enter').click(); };
+$('guide').onclick = e => { if (e.target === $('guide')) closeGuide(); };
+try { if (!localStorage.getItem('tinylives-guide-seen')) openGuide(); } catch (e) { openGuide(); }
 $('back').onclick = () => view === 'trip' ? focusTrip(null) : focusZone(null);
 $('tripBtn').onclick = () => setView(view === 'trip' ? 'home' : 'trip');
 $('pause').onclick = () => { paused = !paused; $('pause').textContent = paused ? '▶ Play' : '❚❚ Pause'; };
@@ -3614,6 +3664,7 @@ $('rainyDay').onclick = () => {                                  // pick a day t
 $('nextHol').onclick = () => { const t = holiday(); const n = t && hour() < t.jump - .1 ? { d: day, hol: t } : nextHoliday(day + 1); jumpTo(n.d, n.hol.jump); };
 addEventListener('pointerdown', unlockAudio);     // any first click starts the sound, not just the big play button
 addEventListener('keydown', e => {
+  if (!$('guide').hidden) { if (e.code === 'Escape') closeGuide(); return; }
   unlockAudio();
   if (e.code === 'Space') { e.preventDefault(); $('pause').click(); }
   if (e.code === 'Escape') { focusZone(null); focusTrip(null); }
