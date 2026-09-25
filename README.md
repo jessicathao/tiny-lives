@@ -4,6 +4,12 @@ A cozy little house where everyone has their own room, and a whole life story un
 
 **▶ Play it here: https://jessicathao.github.io/tiny-lives/**
 
+[![The Tiny Lives house on a spring morning: the kids hunt for Easter eggs in the yard, blossoms fill the oak tree, and everyone is busy in their own room](screenshots/spring.jpg)](https://jessicathao.github.io/tiny-lives/)
+
+| Winter: snow, carolers and a festive tree | Autumn: Pumpkin Night with trick-or-treaters |
+| --- | --- |
+| ![The house in winter with snow on the roof, carolers in the yard and a decorated tree in the den](screenshots/winter.jpg) | ![The house at dusk in autumn with falling leaves, glowing jack-o'-lanterns and trick-or-treaters](screenshots/autumn.jpg) |
+
 Also in this repo: **[Pencil Sonata](https://jessicathao.github.io/tiny-lives/pencil-sonata.html)**, a pencil drawing that plays its own piano tune.
 
 > Click the play button and turn your sound on. Browsers only play sound after a click.
