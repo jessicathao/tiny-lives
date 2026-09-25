@@ -76,7 +76,8 @@
   .chips { display:flex; flex-wrap:wrap; gap:6px; }
   .chips span { font-size:12.5px; padding:4px 10px; border-radius:999px; background:rgba(243,234,216,.07); border:1px solid var(--line); }
   .guide-tips { color:var(--muted); font-size:13px; margin:16px 0 0; }
-  .guide-actions { display:flex; justify-content:flex-end; margin-top:18px; }
+  .guide-actions { display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:18px; }
+  .guide-actions .left { margin-right:auto; }
   button.ctl.primary { background:var(--accent); color:#1c1916; border-color:transparent; font-weight:600; }
   aside { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; align-self:start; }
   aside h2 { margin:0 0 4px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
@@ -178,7 +179,16 @@
       <span>Rainy-day board games</span><span>Building a snowman</span><span>Leo grows up, falls in love and starts a family</span>
     </div>
     <p class="guide-tips">Turn your sound on for the piano music. Everything is drawn and played live in your browser.</p>
-    <div class="guide-actions"><button class="ctl primary" id="guideStart">Start playing ▸</button></div>
+    <div class="guide-actions"><button class="ctl left" id="newGame">Start over</button><button class="ctl primary" id="guideStart">Start playing ▸</button></div>
+  </div>
+</div>
+
+<div class="guide" id="resume" hidden role="dialog" aria-modal="true" aria-labelledby="resumeTitle">
+  <div class="guide-card">
+    <h2 id="resumeTitle">Welcome back!</h2>
+    <p class="lead" id="resumeText"></p>
+    <p class="guide-tips">Your game saves itself automatically in this browser.</p>
+    <div class="guide-actions"><button class="ctl" id="resumeNew">Start over</button><button class="ctl primary" id="resumeGo">Continue ▸</button></div>
   </div>
 </div>
 
@@ -3628,7 +3638,55 @@ function closeGuide() { $('guide').hidden = true; try { localStorage.setItem('ti
 $('helpBtn').onclick = openGuide;
 $('guideStart').onclick = () => { closeGuide(); if (!$('enter').classList.contains('hidden')) $('enter').click(); };
 $('guide').onclick = e => { if (e.target === $('guide')) closeGuide(); };
-try { if (!localStorage.getItem('tinylives-guide-seen')) openGuide(); } catch (e) { openGuide(); }
+
+// ----- auto-save: progress is kept in this browser, so players can come back later -----
+const SAVE_KEY = 'tinylives-save-v1';
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }, del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
+function saveGame() {
+  if (!$('enter').classList.contains('hidden')) return;           // nothing to save until they start playing
+  store.set(SAVE_KEY, JSON.stringify({ v: 1, day, minutes, speed, wxMode, wxKey, snowCover, wet, snowman, famSnowP,
+    eggs: EGGS.map(e => e.found ? 1 : 0), eggsCelebrated, soundOn, vol, at: Date.now() }));
+}
+setInterval(saveGame, 5000);
+addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); });
+addEventListener('pagehide', saveGame);
+function setButtons() {
+  for (const o of $('speed').children) o.setAttribute('aria-pressed', +o.dataset.s === speed);
+  for (const o of $('weather').children) o.setAttribute('aria-pressed', o.dataset.w === (wxMode === 'auto' ? 'auto' : wxKey));
+  $('sound').textContent = soundOn ? '♪ Mute' : '♪ Unmute'; $('vol').value = Math.round(vol * 100);
+}
+function applySave(sv) {
+  speed = sv.speed || 1; wxMode = sv.wxMode || 'auto'; soundOn = sv.soundOn !== false; vol = sv.vol ?? .8;
+  jumpTo(sv.day, sv.minutes / 60);
+  if (sv.wxKey && WX[sv.wxKey]) { setWeather(sv.wxKey); for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] = WX[sv.wxKey][q]; }
+  snowCover = sv.snowCover ?? snowCover; wet = sv.wet ?? 0; snowman = sv.snowman ?? 0; famSnowP = sv.famSnowP ?? 0;
+  if (sv.eggs) EGGS.forEach((e, i) => e.found = !!sv.eggs[i]); eggsCelebrated = !!sv.eggsCelebrated;
+  snapAll(); setButtons(); applyVolume();
+}
+function resetGame() {
+  store.del(SAVE_KEY); speed = 1; wxMode = 'auto';
+  EGGS.forEach(e => e.found = false); eggsCelebrated = false; famSnowP = 0;
+  jumpTo(1, 6.5); setWeather('clear'); for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] = WX.clear[q];
+  snapAll(); setButtons();
+}
+function startPlaying() { if (!$('enter').classList.contains('hidden')) $('enter').click(); else unlockAudio(); }
+function describeSave(sv) {
+  const d = sv.day, hh = Math.floor(sv.minutes / 60) % 24, mm = Math.floor(sv.minutes % 60), hol = holidayOn(d);
+  const t = `${(hh + 11) % 12 + 1}:${String(mm).padStart(2, '0')} ${hh < 12 ? 'AM' : 'PM'}`;
+  return `You were in <b>Year ${yearOf(d)} · ${SEASONS[seasonOf(d)].name}, day ${(d - 1) % SEASON_DAYS + 1}</b> at <b>${t}</b>${hol ? ` (${hol.name})` : ''}. Pick up where you left off?`;
+}
+$('newGame').onclick = () => {
+  if (!confirm('Start over from Spring, day 1? Your saved progress will be lost.')) return;
+  resetGame(); closeGuide(); startPlaying();
+};
+let savedGame = null;
+try { savedGame = JSON.parse(store.get(SAVE_KEY) || 'null'); } catch (e) {}
+if (savedGame && savedGame.v === 1 && savedGame.day >= 1 && (savedGame.day > 1 || savedGame.minutes > 7 * 60)) {
+  $('resumeText').innerHTML = describeSave(savedGame); $('resume').hidden = false; $('resumeGo').focus({ preventScroll: true });
+} else if (!store.get('tinylives-guide-seen')) openGuide();
+$('resumeGo').onclick = () => { $('resume').hidden = true; applySave(savedGame); startPlaying(); };
+$('resumeNew').onclick = () => { $('resume').hidden = true; resetGame(); startPlaying(); };
 $('back').onclick = () => view === 'trip' ? focusTrip(null) : focusZone(null);
 $('tripBtn').onclick = () => setView(view === 'trip' ? 'home' : 'trip');
 $('pause').onclick = () => { paused = !paused; $('pause').textContent = paused ? '▶ Play' : '❚❚ Pause'; };
@@ -3664,6 +3722,7 @@ $('rainyDay').onclick = () => {                                  // pick a day t
 $('nextHol').onclick = () => { const t = holiday(); const n = t && hour() < t.jump - .1 ? { d: day, hol: t } : nextHoliday(day + 1); jumpTo(n.d, n.hol.jump); };
 addEventListener('pointerdown', unlockAudio);     // any first click starts the sound, not just the big play button
 addEventListener('keydown', e => {
+  if (!$('resume').hidden) return;
   if (!$('guide').hidden) { if (e.code === 'Escape') closeGuide(); return; }
   unlockAudio();
   if (e.code === 'Space') { e.preventDefault(); $('pause').click(); }
