@@ -49,6 +49,7 @@ A cutaway house with an attic, bedrooms, a kitchen, a den, a basement and garden
 | **Space** | Pause and resume |
 | **⛶ Full screen** or **F** | Make the game fill the whole screen (Esc to leave). On phones it fills the browser window; turn the phone sideways for the biggest picture |
 | **♡ Like** | Like the game (one like per browser, with a public count) |
+| **💬 Feedback** | Report a bug or share an idea (a short form, no account needed) |
 | **EN / VI** | Switch between English and Vietnamese (Tiếng Việt) |
 
 ## Pencil Sonata
@@ -67,6 +68,10 @@ git add -A && git commit -m "Update" && git push
 ```
 
 GitHub Pages refreshes the site about a minute later.
+
+## Feedback
+
+Found a bug or have an idea? Use the **💬 Feedback** button in the game, or [fill in the feedback form](https://docs.google.com/forms/d/e/1FAIpQLScAGMWf1ZGaEtPjhAcyCxFDzr0aHLDSAG7TvXiJ9Na_nR3iYw/viewform). Developers can also [open an issue](https://github.com/jessicathao/tiny-lives/issues).
 
 ## Languages
 
