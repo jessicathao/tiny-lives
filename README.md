@@ -44,6 +44,8 @@ A cutaway house with an attic, bedrooms, a kitchen, a den, a basement and garden
 | **School day ▸ / Rainy day ▸ / Snowy day ▸** | Jump straight to those days |
 | **Life story ▸** | Jump to the next chapter of Leo's life |
 | **Space** | Pause and resume |
+| **⛶ Full screen** or **F** | Make the game fill the whole screen (Esc to leave) |
+| **♡ Like** | Like the game (one like per browser, with a public count) |
 | **EN / VI** | Switch between English and Vietnamese (Tiếng Việt) |
 
 ## Pencil Sonata
@@ -72,6 +74,6 @@ The game is fully translated into **Vietnamese**: every speech bubble, activity,
 - Each game is a single HTML file with plain JavaScript and no libraries.
 - All graphics are drawn on an HTML `<canvas>`, with no image files.
 - All sound (piano, rain, thunder, fireworks, crickets, bus horn) is generated live with the Web Audio API, with no audio files.
-- The only outside resources are the [Caveat](https://fonts.google.com/specimen/Caveat) font from Google Fonts and a [GoatCounter](https://www.goatcounter.com) script that counts visits and plays anonymously (no cookies, no personal data).
+- The only outside resources are the [Caveat](https://fonts.google.com/specimen/Caveat) font from Google Fonts and a [GoatCounter](https://www.goatcounter.com) script that counts visits, plays and likes anonymously (no cookies, no personal data).
 
 The melodies used ("Happy Birthday", "Auld Lang Syne", Wagner's "Bridal Chorus", "Twinkle Twinkle Little Star" and "Row, Row, Row Your Boat") are traditional or public-domain tunes.
