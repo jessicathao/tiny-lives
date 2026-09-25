@@ -4,6 +4,8 @@ A cozy little house where everyone has their own room, and a whole life story un
 
 **▶ Play it here: https://jessicathao.github.io/tiny-lives/**
 
+🇻🇳 **Tiếng Việt:** https://jessicathao.github.io/tiny-lives/?lang=vi
+
 [![The Tiny Lives house on a spring morning: the kids hunt for Easter eggs in the yard, blossoms fill the oak tree, and everyone is busy in their own room](screenshots/spring.jpg)](https://jessicathao.github.io/tiny-lives/)
 
 | Winter: snow, carolers and a festive tree | Autumn: Pumpkin Night with trick-or-treaters |
@@ -42,6 +44,7 @@ A cutaway house with an attic, bedrooms, a kitchen, a den, a basement and garden
 | **School day ▸ / Rainy day ▸ / Snowy day ▸** | Jump straight to those days |
 | **Life story ▸** | Jump to the next chapter of Leo's life |
 | **Space** | Pause and resume |
+| **EN / VI** | Switch between English and Vietnamese (Tiếng Việt) |
 
 ## Pencil Sonata
 
@@ -59,6 +62,10 @@ git add -A && git commit -m "Update" && git push
 ```
 
 GitHub Pages refreshes the site about a minute later.
+
+## Languages
+
+The game is fully translated into **Vietnamese**: every speech bubble, activity, holiday, sign and menu. Use the **EN / VI** buttons in the toolbar. Players whose browser is set to Vietnamese get it automatically, and the choice is remembered. Share `?lang=vi` to open it straight in Vietnamese.
 
 ## How it's made
 
