@@ -23,7 +23,7 @@ A cutaway house with an attic, bedrooms, a kitchen, a den, a basement and garden
 **The family:** Leo (a kid who grows up), Nora the baker, Juniper the rabbit painter, Biscuit the dog, Miso the cat, Dot the duck, Pip & Squeak the mice, Bramble the hedgehog and Olive the owl.
 
 - **Day and night:** the sun and moon cross the sky, lamps switch on at night, and residents wake, work, play and sleep.
-- **Weather:** sun, clouds, rain, thunderstorms and snow. Puddles fill up, snow piles on the roof, lightning flashes, and a rainbow appears after rain.
+- **Weather:** it changes by itself with the seasons: sun, clouds, rain, thunderstorms, and snow in winter. Puddles fill up, snow piles on the roof, lightning flashes, and a rainbow appears after rain.
 - **Seasons:** blossoms in spring, fans and sunflowers in summer, falling leaves and pumpkins in autumn, radiators, a wood stove and string lights in winter.
 - **Holidays:** a Spring Egg Hunt (click the hidden eggs!), Leo's Birthday Party, a Beach & Camping Weekend, Midsummer Fireworks, Pet Adoption Day, Pumpkin Night, the Winterlight Festival and a New Year's Eve countdown.
 - **Everyday life:** school days with a school bus and a live classroom window, rainy-day board games in the den, snowy days building a family snowman, and housemates popping into each other's rooms to say hi or help out.
@@ -41,7 +41,6 @@ A cutaway house with an attic, bedrooms, a kitchen, a den, a basement and garden
 | **Next holiday ▸** | Jump to the best moment of the next holiday |
 | **School day ▸ / Rainy day ▸ / Snowy day ▸** | Jump straight to those days |
 | **Life story ▸** | Jump to the next chapter of Leo's life |
-| **Auto / Sunny / … / Snow** | Let the weather change by itself or pick one |
 | **Space** | Pause and resume |
 
 ## Pencil Sonata

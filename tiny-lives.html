@@ -133,14 +133,6 @@
       <button class="ctl" id="rainyDay">Rainy day ▸</button>
       <button class="ctl" id="snowyDay">Snowy day ▸</button>
       <button class="ctl" id="lifeBtn">Life story ▸</button>
-      <div class="group" id="weather">
-        <button class="ctl" data-w="auto" aria-pressed="true">Auto</button>
-        <button class="ctl" data-w="clear">Sunny</button>
-        <button class="ctl" data-w="cloudy">Cloudy</button>
-        <button class="ctl" data-w="rain">Rain</button>
-        <button class="ctl" data-w="storm">Storm</button>
-        <button class="ctl" data-w="snow">Snow</button>
-      </div>
       <div class="vol"><button class="ctl" id="sound">♪ Mute</button><input type="range" id="vol" min="0" max="100" value="80" aria-label="Volume"></div>
       <span class="hint" id="hint">Click anywhere to start the sound</span>
     </div>
@@ -169,7 +161,7 @@
       <li><b>Click anyone</b> to say hi. They'll tell you what they're up to and play their own little tune.</li>
       <li><b>Time passes by itself.</b> A day lasts about 4 minutes. Use <b>4×</b> or <b>12×</b> to speed up, or <b>Space</b> to pause.</li>
       <li><b>Jump around</b> with the buttons under the picture: a time of day, a season, <b>Next holiday ▸</b>, <b>Rainy day ▸</b>, <b>Snowy day ▸</b> or <b>Life story ▸</b>.</li>
-      <li><b>Pick the weather</b> (sun, rain, storm, snow) or leave it on Auto.</li>
+      <li><b>The weather changes by itself</b> with the seasons: sunny days, rain, storms, and snow in winter.</li>
       <li>The <b>Right now</b> list shows what everyone is doing. Click a name to find them.</li>
     </ol>
     <h3>Things to discover</h3>
@@ -302,10 +294,8 @@ function onNewDay() {
   if (hol && hol.id === 'eggs') { EGGS.forEach(e => e.found = false); eggsCelebrated = false; }
   songUntil = 0; songEnded = true; candlesOutAt = -1e9; confetti = [];
   schoolBus.phase = 'none'; busDone.am = busDone.pm = false;
-  if (wxMode === 'auto') {
-    if (hol && hol.wx) { setWeather(hol.wx); wxNext = (24 - hour()) * 60 + 30; }
-    else if (!WX_SEASON[season().id][wxKey]) { setWeather(pickWeather()); wxNext = 3 * 60; }
-  }
+  if (hol && hol.wx) { setWeather(hol.wx); wxNext = (24 - hour()) * 60 + 30; }
+  else if (!WX_SEASON[season().id][wxKey]) { setWeather(pickWeather()); wxNext = 3 * 60; }
 }
 
 const SKY = [[0, '#0b1030', '#1c2250'], [4.5, '#101540', '#2a2d5e'], [5.5, '#3b3a78', '#c97b8e'], [6.5, '#7fa8d8', '#f6c49a'],
@@ -328,8 +318,8 @@ const WX = {
   snow:   { name: 'Snow',   cloud: .7,  rain: 0,   snow: .75, storm: 0, wind: .18 },
 };
 const WX_SEASON = { spring: { clear: 3, cloudy: 2, rain: 2.5 }, summer: { clear: 4, cloudy: 1.5, rain: 1, storm: 1.2 },
-  autumn: { clear: 2, cloudy: 3, rain: 2.5, storm: .5 }, winter: { clear: 2, cloudy: 2, snow: 3.5 } };
-let wxMode = 'auto', wxKey = 'clear', wxNext = 3 * 60;       // game minutes until the next automatic change
+  autumn: { clear: 2, cloudy: 3, rain: 2.5, storm: .5 }, winter: { clear: 2, cloudy: 2, snow: 3.5, rain: .8 } };
+let wxKey = 'clear', wxNext = 3 * 60;       // game minutes until the next automatic change
 const wx = { ...WX.clear };                                   // smoothed, what we actually render
 let wet = 0, snowCover = 0, snowman = 0, rainbowAt = -1e9, gameT = 0, flashT = -9, nextFlash = 3, bolt = null;
 function setWeather(key) {
@@ -342,7 +332,8 @@ function pickWeather() {
   let x = Math.random() * sum; for (const k in opts) { x -= opts[k]; if (x <= 0) return k; } return 'clear';
 }
 function updateWeather(dt, dm) {
-  if (wxMode === 'auto') { wxNext -= dm; if (wxNext <= 0) { setWeather(pickWeather()); wxNext = (2.5 + Math.random() * 5) * 60; } }
+  if (!WX_SEASON[season().id][wxKey] && !(holiday() && holiday().wx === wxKey)) { setWeather(pickWeather()); wxNext = 3 * 60; }   // no snow outside winter
+  wxNext -= dm; if (wxNext <= 0) { setWeather(pickWeather()); wxNext = (2.5 + Math.random() * 5) * 60; }
   const T = WX[wxKey], f = Math.min(1, dt * .5 * Math.sqrt(speed));
   for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] += (T[q] - wx[q]) * f;
   wet = clamp(wet + dm * (wx.rain > .15 ? wx.rain * .006 : -.0012));
@@ -3645,7 +3636,7 @@ const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { 
   set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} }, del: k => { try { localStorage.removeItem(k); } catch (e) {} } };
 function saveGame() {
   if (!$('enter').classList.contains('hidden')) return;           // nothing to save until they start playing
-  store.set(SAVE_KEY, JSON.stringify({ v: 1, day, minutes, speed, wxMode, wxKey, snowCover, wet, snowman, famSnowP,
+  store.set(SAVE_KEY, JSON.stringify({ v: 1, day, minutes, speed, wxKey, wxNext, snowCover, wet, snowman, famSnowP,
     eggs: EGGS.map(e => e.found ? 1 : 0), eggsCelebrated, soundOn, vol, at: Date.now() }));
 }
 setInterval(saveGame, 5000);
@@ -3653,19 +3644,18 @@ addEventListener('visibilitychange', () => { if (document.hidden) saveGame(); })
 addEventListener('pagehide', saveGame);
 function setButtons() {
   for (const o of $('speed').children) o.setAttribute('aria-pressed', +o.dataset.s === speed);
-  for (const o of $('weather').children) o.setAttribute('aria-pressed', o.dataset.w === (wxMode === 'auto' ? 'auto' : wxKey));
   $('sound').textContent = soundOn ? '♪ Mute' : '♪ Unmute'; $('vol').value = Math.round(vol * 100);
 }
 function applySave(sv) {
-  speed = sv.speed || 1; wxMode = sv.wxMode || 'auto'; soundOn = sv.soundOn !== false; vol = sv.vol ?? .8;
+  speed = sv.speed || 1; soundOn = sv.soundOn !== false; vol = sv.vol ?? .8;
   jumpTo(sv.day, sv.minutes / 60);
-  if (sv.wxKey && WX[sv.wxKey]) { setWeather(sv.wxKey); for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] = WX[sv.wxKey][q]; }
+  if (sv.wxKey && WX[sv.wxKey] && WX_SEASON[season().id][sv.wxKey]) { setWeather(sv.wxKey); wxNext = sv.wxNext > 0 ? sv.wxNext : 3 * 60; for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] = WX[sv.wxKey][q]; }
   snowCover = sv.snowCover ?? snowCover; wet = sv.wet ?? 0; snowman = sv.snowman ?? 0; famSnowP = sv.famSnowP ?? 0;
   if (sv.eggs) EGGS.forEach((e, i) => e.found = !!sv.eggs[i]); eggsCelebrated = !!sv.eggsCelebrated;
   snapAll(); setButtons(); applyVolume();
 }
 function resetGame() {
-  store.del(SAVE_KEY); speed = 1; wxMode = 'auto';
+  store.del(SAVE_KEY); speed = 1;
   EGGS.forEach(e => e.found = false); eggsCelebrated = false; famSnowP = 0;
   jumpTo(1, 6.5); setWeather('clear'); for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] = WX.clear[q];
   snapAll(); setButtons();
@@ -3694,11 +3684,6 @@ for (const b of $('speed').children) b.onclick = () => { speed = +b.dataset.s; f
 for (const b of $('jump').children) b.onclick = () => { minutes = +b.dataset.h * 60; snapAll(); };
 $('sound').onclick = () => { soundOn = !soundOn; $('sound').textContent = soundOn ? '♪ Mute' : '♪ Unmute'; unlockAudio(); applyVolume(); };
 $('vol').oninput = e => { vol = e.target.value / 100; if (vol > 0 && !soundOn) { soundOn = true; $('sound').textContent = '♪ Mute'; } unlockAudio(); applyVolume(); };
-for (const b of $('weather').children) b.onclick = () => {
-  const w = b.dataset.w; wxMode = w === 'auto' ? 'auto' : 'manual';
-  if (w === 'auto') wxNext = Math.min(wxNext, 60); else setWeather(w);
-  for (const o of $('weather').children) o.setAttribute('aria-pressed', o === b);
-};
 for (const b of $('seasons').children) b.onclick = () => jumpTo(Math.floor((day - 1) / 12) * 12 + +b.dataset.season * SEASON_DAYS + 1, 7);
 $('nextSchool').onclick = () => {                              // the next school day (or, once Leo has grown up, work day)
   const ok = d => isSchoolDay(d) || isWorkDay(d); let d = ok(day) && hour() < 7.2 ? day : 0;
@@ -3706,8 +3691,7 @@ $('nextSchool').onclick = () => {                              // the next schoo
 };
 $('snowyDay').onclick = () => {                                 // the next non-holiday winter day, with fresh snow
   let d = 0; for (let i = day; !d && i < day + 30; i++) if (seasonOf(i) === 3 && !holidayOn(i)) d = i;
-  wxMode = 'manual'; for (const o of $('weather').children) o.setAttribute('aria-pressed', o.dataset.w === 'snow');
-  jumpTo(d, isWorkDay(d) ? 17.5 : isSchoolDay(d) ? 15.95 : 9.9); setWeather('snow');
+  jumpTo(d, isWorkDay(d) ? 17.5 : isSchoolDay(d) ? 15.95 : 9.9); setWeather('snow'); wxNext = 3 * 60;   // snows long enough to build the snowman
   for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] = WX.snow[q]; snowCover = .75; famSnowP = 0; snapAll();
 };
 $('lifeBtn').onclick = () => {                                  // jump to the next chapter of Leo's life
@@ -3715,8 +3699,7 @@ $('lifeBtn').onclick = () => {                                  // jump to the n
 };
 $('rainyDay').onclick = () => {                                  // pick a day that is free for games, make it rain
   let d = 0; for (let i = day; !d && i < day + 14; i++) if (!holidayOn(i)) d = i;
-  wxMode = 'manual'; for (const o of $('weather').children) o.setAttribute('aria-pressed', o.dataset.w === 'rain');
-  jumpTo(d, isSchoolDay(d) ? 16.1 : 10.2); setWeather('rain');
+  jumpTo(d, isSchoolDay(d) ? 16.1 : 10.2); setWeather('rain'); wxNext = (17.6 - hour()) * 60;   // rains through game time
   for (const q of ['cloud', 'rain', 'snow', 'storm', 'wind']) wx[q] = WX.rain[q]; wet = .6; snapAll();
 };
 $('nextHol').onclick = () => { const t = holiday(); const n = t && hour() < t.jump - .1 ? { d: day, hol: t } : nextHoliday(day + 1); jumpTo(n.d, n.hol.jump); };
