@@ -184,7 +184,7 @@ function hexMix(a, b, u) { const A = parseInt(a.slice(1), 16), B = parseInt(b.sl
   const m = s => Math.round(lerp(A >> s & 255, B >> s & 255, u)); return '#' + ((m(16) << 16) | (m(8) << 8) | m(0)).toString(16).padStart(6, '0'); }
 
 // ================= clock =================
-let minutes = 6.5 * 60, day = 2, speed = 1, paused = false, rt = 0;       // start on the Spring Egg Hunt
+let minutes = 6.5 * 60, day = 1, speed = 1, paused = false, rt = 0;       // start at the very beginning: Spring, day 1
 const RATE = 6;                                   // game minutes per real second at 1×
 const hour = () => minutes / 60;
 
@@ -1364,6 +1364,7 @@ R.leo.hol.unshift(
 const lilyHere = () => {
   const h = hour(), ho = holId();
   if (day === WED_DAY) return h >= 12.5;
+  if (dating() && nyT() >= 19 && nyT() < 24.8) return true;     // she stays up for the New Year countdown
   if (married()) return true;
   if (!dating() || tripOn()) return false;
   if (day === MEET_DAY) return h >= 17.2 && h < 21.3;
@@ -1665,6 +1666,27 @@ snowRoles('lily', { label: 'making snow angels', spot: 40, face: 1, pose: 'sitFl
   { label: 'having a snowball fight!', wander: [20, 210], action: 'throw', say: 'Take that, Leo!' });
 for (const id of ['daisy', 'pepper', 'button', 'waffles']) snowRoles(id, { label: 'bounding through the snow', wander: [20, 220], fast: true, action: 'play', say: 'Cold paws! Fun paws!' },
   null, { label: 'chasing snowballs', wander: [20, 220], fast: true, action: 'play', say: 'Yip!' });
+// ----- everyone dresses for the season -----
+LILY.slook = { spring: { shirt: '#f4a6c6', skirt: '#f4a6c6' }, summer: { shirt: '#fbf3c4', skirt: '#8fd3f4', sunhat: '#f2d49b' },
+  autumn: { shirt: '#c8702a', skirt: '#6d4c3d', scarf: '#e6a531' }, winter: { shirt: '#2e5e8a', skirt: '#2e5e8a', scarf: '#f4efe6', hat: '#f4efe6' } };
+BABY.slook = { summer: { shirt: '#fbf3c4', pants: '#fbf3c4' }, autumn: { shirt: '#e6a531', pants: '#e6a531' }, winter: { shirt: '#8fc7e8', pants: '#8fc7e8', hat: '#f4a6c6' } };
+DAISY.slook = { winter: { sweater: '#f4a6c6' } };
+R.maya.slook = { summer: { shirt: '#f7c6d9' }, autumn: { shirt: '#c8702a' }, winter: { shirt: '#2e7d4f', scarf: '#f2c230' } };
+R.otto.slook = { summer: { shirt: '#f4efe6' }, winter: { shirt: '#8b3a3a', scarf: '#2d3a4a' } };
+
+// ----- New Year's Eve with Lily, Poppy and Daisy -----
+LILY.acts.nyparty = { label: "sipping cider at the New Year's Eve party", zone: 'biscuit', spot: 846, dy: -6, face: -1, pose: 'sit', action: 'drink', look: { party: '#f4a6c6' }, say: 'Our first New Year together!' };
+LILY.acts.nywatch = { zone: 'garden', spot: 1076, face: -1, look: { ...COZY, hat: '#f4efe6', scarf: '#f4a6c6' },
+  get action() { return hasBaby() && yearOf(day) < 8 ? 'pram' : nyT() >= 24 ? 'stretch' : 'wave'; },
+  label: () => nyT() >= 24 ? (hasBaby() ? 'watching the fireworks with Poppy' : 'watching the New Year fireworks!') : 'waiting for the midnight countdown',
+  say: () => nyT() >= 24 ? 'Happy New Year, my loves!' : hasBaby() ? 'Look, Poppy! The countdown!' : 'Is it midnight yet?' };
+LILY.hol.unshift([NY(20, 23.5), 'nyparty'], [NY(23.5, 24.7), 'nywatch']);
+BABY.acts.nytoddle = { zone: 'garden', spot: 1060, face: 1, look: { hat: '#f4a6c6', scarf: '#f2c230' }, get action() { return nyT() >= 24 ? 'stretch' : 'wave'; },
+  label: () => nyT() >= 24 ? (yearOf(day) === 8 ? 'seeing fireworks for the very first time!' : 'cheering at the New Year fireworks') : 'staying up late for the countdown', say: () => nyT() >= 24 ? 'Ooooh! Pretty!' : 'Boom boom?' };
+BABY.acts.nypram = { label: () => nyT() >= 24 ? 'watching the fireworks from the pram' : 'bundled up in the pram for the countdown', zone: 'pram', spot: 0, say: 'Ga!' };
+BABY.hol = [[NY(23.4, 24.7), () => yearOf(day) >= 8 ? 'nytoddle' : 'nypram']];
+DAISY.acts.nyhide = { label: 'hiding from the fireworks with Biscuit', zone: 'biscuit', spot: 1004, dy: -6, pose: 'sleep', shiver: true, say: 'Too loud! Too loud!' };
+DAISY.hol.unshift([NY(23.5, 24.7), 'nyhide']);
 R.leo.whatNow = () => hasBaby() ? 'dad · astronomer' : married() ? 'newlywed · astronomer' : day >= WORK_START ? 'junior astronomer' : leoAdult() ? 'graduate' : 'kid';
 const MILESTONES = [[GRAD_DAY, 8.8], [WORK_START, 7.7], [MEET_DAY, 16.9], [WED_DAY, 13.2], [BABY_DAY, 10.4]];
 
